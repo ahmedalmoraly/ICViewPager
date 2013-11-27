@@ -155,12 +155,29 @@ typedef NS_ENUM(NSUInteger, ViewPagerComponent) {
  */
 - (UIView *)viewPager:(ViewPagerController *)viewPager contentViewForTabAtIndex:(NSUInteger)index;
 
+/**
+ *  returns the title to be used for the close button
+ *
+ *  @Default "Back"
+ *
+ *  @return the title to be used for the close button
+ */
+-(NSString *)titleForCloseButton;
+
 @end
 
 #pragma mark delegate
 @protocol ViewPagerDelegate <NSObject>
 
 @optional
+/**
+ *  delegate object must implement this method if wants to be informed when tapping on Close button
+ *
+ *  @param viewPager   The viewPager that's subject to
+ *  @param closeButton The close button
+ */
+- (void)viewPager:(ViewPagerController *)viewPager didTabOnCloseButton:(UIButton *)closeButton;
+
 /**
  * delegate object must implement this method if wants to be informed when a tab changes
  *

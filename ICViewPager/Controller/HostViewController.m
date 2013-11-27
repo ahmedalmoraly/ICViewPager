@@ -116,4 +116,8 @@
     }
 }
 
+-(void)viewPager:(ViewPagerController *)viewPager didTabOnCloseButton:(UIButton *)closeButton {
+    [[[UIAlertView alloc] initWithTitle:@"Tap" message:Nil delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] show];
+}
+
 @end

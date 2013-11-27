@@ -11,6 +11,8 @@
 #pragma mark - Constants and macros
 #define kTabViewTag 38
 #define kContentViewTag 34
+#define kCloseButtonTag 40
+
 #define IOS_VERSION_7 [[[UIDevice currentDevice] systemVersion] compare:@"7.0" options:NSNumericSearch] != NSOrderedAscending
 
 #define kTabHeight 44.0
@@ -118,6 +120,7 @@
 // Tab and content stuff
 @property UIScrollView *tabsView;
 @property UIView *contentView;
+@property UIButton *closeButton;
 
 @property UIPageViewController *pageViewController;
 @property (assign) id<UIScrollViewDelegate> actualDelegate;
@@ -210,12 +213,17 @@
 //        }
 //    }
     
+    
     CGRect frame = self.tabsView.frame;
-    frame.origin.x = 0.0;
+    frame.origin.x = 50.0;
     frame.origin.y = [self.tabLocation boolValue] ? topLayoutGuide : CGRectGetHeight(self.view.frame) - [self.tabHeight floatValue];
-    frame.size.width = CGRectGetWidth(self.view.frame);
+    frame.size.width = CGRectGetWidth(self.view.frame) - frame.origin.x;
     frame.size.height = [self.tabHeight floatValue];
     self.tabsView.frame = frame;
+    
+    frame.size.width = frame.origin.x;
+    frame.origin.x = 0;
+    self.closeButton.frame = frame;
     
     frame = self.contentView.frame;
     frame.origin.x = 0.0;
@@ -773,7 +781,7 @@
     
     if (!self.tabsView) {
         
-        self.tabsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(self.view.frame), [self.tabHeight floatValue])];
+        self.tabsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0, 35.0, CGRectGetWidth(self.view.frame)-35.0, [self.tabHeight floatValue])];
         self.tabsView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tabsView.backgroundColor = self.tabsViewBackgroundColor;
         self.tabsView.showsHorizontalScrollIndicator = NO;
@@ -781,6 +789,20 @@
         self.tabsView.tag = kTabViewTag;
         
         [self.view insertSubview:self.tabsView atIndex:0];
+    }
+    
+    self.closeButton = (UIButton *)[self.view viewWithTag:kCloseButtonTag];
+    
+    if (!self.closeButton) {
+        self.closeButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        self.closeButton.frame = CGRectMake(0, CGRectGetHeight(self.view.frame) - self.tabHeight.floatValue, 50, self.tabHeight.floatValue);
+        self.closeButton.backgroundColor = self.tabsViewBackgroundColor;
+        self.closeButton.layer.borderWidth = 0.5;
+        self.closeButton.layer.borderColor = [UIColor whiteColor].CGColor;
+        NSString *title = [self.dataSource respondsToSelector:@selector(titleForCloseButton)] ? [self.dataSource titleForCloseButton] : @"Back";
+        [self.closeButton setTitle:title forState:UIControlStateNormal];
+        [self.closeButton addTarget:self action:@selector(handleCloseButton:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:self.closeButton];
     }
     
     // Add tab views to _tabsView
@@ -916,6 +938,12 @@
 - (NSUInteger)indexForViewController:(UIViewController *)viewController {
     
     return [self.contents indexOfObject:viewController];
+}
+
+-(void)handleCloseButton:(id)sender {
+    if ([self.delegate respondsToSelector:@selector(viewPager:didTabOnCloseButton:)]) {
+        [self.delegate viewPager:self didTabOnCloseButton:sender];
+    }
 }
 
 #pragma mark - UIPageViewControllerDataSource
